@@ -1,0 +1,109 @@
+import pandas as pd
+from scipy import stats
+import numpy as np
+
+# data input
+df = pd.read_csv('/home/kutaykesim/Dropbox/output8.csv')
+
+# data output
+df.to_csv('output8.csv')
+###
+df.PlanC = df.PlanC.fillna('Other')
+
+df.TimesPaid = df.Recurrence+1
+#brackets over '.'
+df['TotalValue'] = df.TimesPaid*df.Amount
+
+df.PlanA = df.PlanA.combine_first(df.PlanB)
+df.PlanA = df.PlanA.combine_first(df.PlanC)
+#Quick overview of the data
+#df.head()
+#df.columns
+#df.info
+#df.shape
+
+
+###dropping columns and rows
+
+del df['Unnamed: 0']
+
+df = df[pd.notnull(df['Country'])] #null countries  dropped
+
+#####
+
+# if a>30 y = major
+###
+A = []
+for a, row in df.iterrows():
+    if row['Mobile']==1:
+        A.append('Mobile')
+    else:
+        A.append('Desktop')
+
+df['A'] = A
+
+for i in df.Country:
+    if 'Bra' in df.Country:
+        df.Country.loc[0] = 'Brezilya'
+    else:
+        print(df.Country.loc[i])
+
+####
+df['Platform'] = np.where(df['Mobile']==1, 'Mobile', 'Desktop')
+###
+for i in df.Mobile:
+    if df.Mobile[i] == 1:
+        df['Platform'] = 'Mobile'
+    else:
+        df['Platform'] = 'Desktop'
+
+#exclude outliers
+dftrimmed = df[(np.abs(stats.zscore(df.TotalValue) < 3))]
+
+euro[(np.abs(stats.zscore(euro)) < 3).all(axis=1)]#to all columns if all numbers
+
+df.TotalValue[(np.abs(stats.zscore(df.TotalValue) > 3))
+df[(np.abs(stats.zscore(df) > 3))]#outliers
+df[(np.abs(stats.zscore(df) < 3))]#normals
+
+df_payment_method = df.groupby('PaymentMethod')['User ID'].nunique()
+
+df = df.dropna(subset=['Country'])
+
+#df_country = df.groupby('Country')['User ID'].nunique()
+
+
+df.Plan = df.Plan.str.split().str[0]
+# plans keep first word only
+df2 = df.groupby('Plan')['User ID'].nunique()
+
+##### REplace Multiple
+df.Country = df.Country.replace({
+'United States of America':'United States',
+'Moldova - Republic of':'Moldova',
+'Russian Federation':'Russia',
+'Other':''})
+
+#fills null values
+df.PaymentMethod = df.PaymentMethod.fillna('Other')
+#replace
+df.PaymentMethod = df.PaymentMethod.replace({
+'_credit_card':'CreditCard',
+'_boleto':'Boleto',
+'boleto':'Boleto',
+'mc':'MasterCard',
+'sepadirectdebit':'Sepa',
+'paypal':'PayPal'})
+
+####
+df.Plan = df.Plan.replace({
+' Premium membership':'',
+'Premium - ':'',
+'  1 month':'1 month',
+' (special 10%% discount)':'',
+'Month':'1 month',
+'Semi_Annual':'6 months',
+'Two_Years':'24 months',
+'Annual':'12 months'}, regex=True)
+
+## from 33 categories to
